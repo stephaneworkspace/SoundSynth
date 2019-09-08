@@ -27,6 +27,7 @@ double MakeNoise(double dTime)
 {
 	// sin wave
 	//return 0.5 * sin(440.0 * 2 * 3.14159 * dTime);
+	//return 0.5 * sin(dFrequencyOutput * 2 * 3.14159 * dTime);
 	// Square wave
 	double dOutput = 1 * sin(dFrequencyOutput * 2 * 3.14159 * dTime);
 	if (dOutput > 0.0)
@@ -55,8 +56,8 @@ int main()
 	sound.SetUserFunction(MakeNoise);
 
 	//double dOctaveBaseFrequency = 440; // C 110.0; // A2
-	double dOctaveBaseFrequency = 110.0; // A2
-	double d12ThRootOF2 = pow(2.0, 1.0 / 12.0); // puissance
+	double dOctaveBaseFrequency = 432; // A2
+	double d12ThRootOF2 = pow(2.0, 1.0 / 12); // puissance
 
 	while (1) 
 	{
@@ -80,9 +81,9 @@ int main()
 
 		// 12
 
-		for (int i = 1; i <= 12; i++)
+		for (int i = 1; i <= 72; i++)
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			std::this_thread::sleep_for(std::chrono::milliseconds(30));
 			dFrequencyOutput = dOctaveBaseFrequency * pow(d12ThRootOF2, i);
 		}
 
