@@ -1,0 +1,12 @@
+﻿  main.cpp
+C:\Users\sbres\source\repos\code-it-yourself\SoundSynth\SoundSynth\olcNoiseMaker.h(95,18) : warning C4244: 'initialisation' : conversion de '__int64' en 'int', perte possible de données
+C:\Users\sbres\source\repos\code-it-yourself\SoundSynth\SoundSynth\olcNoiseMaker.h(76) : message : pendant la compilation de la fonction membre classe modèle 'bool olcNoiseMaker<short>::Create(std::wstring,unsigned int,unsigned int,unsigned int,unsigned int)'
+C:\Users\sbres\source\repos\code-it-yourself\SoundSynth\SoundSynth\olcNoiseMaker.h(67) : message : voir la référence à l'instanciation de la fonction modèle 'bool olcNoiseMaker<short>::Create(std::wstring,unsigned int,unsigned int,unsigned int,unsigned int)' en cours de compilation
+C:\Users\sbres\source\repos\code-it-yourself\SoundSynth\SoundSynth\main.cpp(40) : message : voir la référence à l'instanciation classe modèle 'olcNoiseMaker<short>' en cours de compilation
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\VC\Tools\MSVC\14.23.28019\include\chrono(669) : message : voir la référence à l'instanciation classe modèle 'std::chrono::duration<double,std::ratio<1,1>>' en cours de compilation
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\VC\Tools\MSVC\14.23.28019\include\chrono(177) : message : voir la référence à l'instanciation classe modèle 'std::chrono::duration<__int64,std::nano>' en cours de compilation
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\VC\Tools\MSVC\14.23.28019\include\chrono(647) : message : voir la référence à l'instanciation classe modèle 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::steady_clock::duration>' en cours de compilation
+C:\Users\sbres\source\repos\code-it-yourself\SoundSynth\SoundSynth\olcNoiseMaker.h(223,1) : warning C4312: 'cast de type' : la conversion de 'DWORD' en 'olcNoiseMaker<short> *' d'une taille supérieure
+C:\Users\sbres\source\repos\code-it-yourself\SoundSynth\SoundSynth\olcNoiseMaker.h(222) : message : pendant la compilation de la fonction membre classe modèle 'void olcNoiseMaker<short>::waveOutProcWrap(HWAVEOUT,UINT,DWORD,DWORD,DWORD)'
+C:\Users\sbres\source\repos\code-it-yourself\SoundSynth\SoundSynth\olcNoiseMaker.h(106) : message : voir la référence à l'instanciation de la fonction modèle 'void olcNoiseMaker<short>::waveOutProcWrap(HWAVEOUT,UINT,DWORD,DWORD,DWORD)' en cours de compilation
+  SoundSynth.vcxproj -> C:\Users\sbres\source\repos\code-it-yourself\SoundSynth\x64\Debug\SoundSynth.exe
