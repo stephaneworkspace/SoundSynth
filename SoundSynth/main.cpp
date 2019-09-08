@@ -4,6 +4,11 @@ using namespace std;
 
 #include "olcNoiseMaker.h"
 
+/*double calc = 0.5 * sin(440.0 * 2 * 3.14159 * dTime);
+string calcString = std::to_string(calc);
+wstring wcalcString;
+StringToWString(wcalcString, calcString);
+wcout << wcalcString << endl;
 int StringToWString(std::wstring& ws, const std::string& s)
 {
 	std::wstring wsTmp(s.begin(), s.end());
@@ -11,16 +16,20 @@ int StringToWString(std::wstring& ws, const std::string& s)
 	ws = wsTmp;
 
 	return 0;
-}
+}*/
+
+double dFrequencyOutput = 0.0;
 
 double MakeNoise(double dTime)
 {
-	/*double calc = 0.5 * sin(440.0 * 2 * 3.14159 * dTime);
-	string calcString = std::to_string(calc);
-	wstring wcalcString;
-	StringToWString(wcalcString, calcString);
-	wcout << wcalcString << endl;*/
-	return 0.5 * sin(440.0 * 2 * 3.14159 * dTime);
+	// sin wave
+	//return 0.5 * sin(440.0 * 2 * 3.14159 * dTime);
+	// Square wave
+	double dOutput = 1 * sin(dFrequencyOutput * 2 * 3.14159 * dTime);
+	if (dOutput > 0.0)
+		return 0.2;
+	else
+		return -0.2;
 }
 
 int main()
@@ -41,7 +50,15 @@ int main()
 
 	while (1) 
 	{
-
+		// Add a keyboard
+		if (GetAsyncKeyState('A') & 0x8000)
+		{
+			dFrequencyOutput = 440.0;
+		}
+		else
+		{
+			dFrequencyOutput = 0.0;
+		}
 	}
 
 	return 0;
