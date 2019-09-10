@@ -222,7 +222,7 @@ int main()
 		{
 			if (nCurrentKey != -1)
 			{
-				dFrequencyOutput = 0.0;
+				// dFrequencyOutput = 0.0; inutile depuis la création de la classe d'envelope ADSR
 				envelope.NoteOff(sound.GetTime());
 				nCurrentKey = -1;
 			}
