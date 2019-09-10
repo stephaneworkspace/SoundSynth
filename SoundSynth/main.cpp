@@ -26,46 +26,129 @@ double w(double dHertz)
 	return dHertz * 2.0 * PI;
 }
 
-/**
- * nType 0 => Sin
- *       1 => Square
- *       2 => Triangle
- */
-double osc(double dHertz, double dTime, int nType)
+// General purpose oscillator
+#define OSC_SINE 0
+#define OSC_SQUARE 1
+#define OSC_TRIANGLE 2
+#define OSC_SAW_ANA 3
+#define OSC_SAW_DIG 4
+#define OSC_NOISE 5
+
+double osc(double dHertz, double dTime, int nType = OSC_SINE)
 {
 	switch (nType) {
-	case 0: // sin
+	case OSC_SINE: // sin
 		return sin(w(dHertz) * dTime);
-	case 1: // square
+	case OSC_SQUARE: // square
 		return sin(w(dHertz) * dTime) > 0.0 ? 1.0 : 0.0;
-	case 2: // triangle
+	case OSC_TRIANGLE: // triangle
 		return asin(sin(w(dHertz) * dTime)) * 2 / PI;
-	case 3: // saw - analog - warm - slow
+	case OSC_SAW_ANA: // saw - analog - warm - slow
 	{
 		double dOutput = 0.0;
 		for (double n = 1.0; n < 100.0; n++)
 			dOutput += (sin(n * w(dHertz) * dTime)) / n;
 		return dOutput * (2.0 / PI);
 	}
-	case 4: // saw - computed - harsh - fast
+	case OSC_SAW_DIG: // saw - computed - harsh - fast
 		return (2.0 * PI) * (dHertz * PI * fmod(dTime, 1.0 / dHertz) - (PI / 2.0));
-	case 5: // pseudo random noise
+	case OSC_NOISE: // pseudo random noise
 		return dHertz * (2.0 * ((double)rand() / (double)RAND_MAX) - 1.0);
 	default:
 		return 0.0;
 	}
 }
 
+struct sEnvelopeADSR 
+{
+	double dAttackTime;
+	double dDeceyTime;
+	double dReleaseTime;
+
+	double dSustainAmplitude;
+	double dStartAmplitude;
+
+	double dTriggerOnTime; // key pressed
+	double dTriggerOffTime; // key release
+
+	bool bNoteOn;
+
+	sEnvelopeADSR() 
+	{
+		dAttackTime = 0.01; // 10ms
+		dDeceyTime = 0.01;
+		dStartAmplitude = 1.0;
+		dSustainAmplitude = 0.8;
+		dReleaseTime = 0.2;
+		dTriggerOnTime = 0.0;
+		dTriggerOffTime = 0.0;
+		bNoteOn = false;
+	}
+
+	double GetAmplitude(double dTime)
+	{
+		double dAmplitude = 0.0;
+		double dLifeTime = dTime - dTriggerOnTime;
+
+		if (bNoteOn)
+		{
+			// Attack
+			if (dLifeTime <= dAttackTime)
+				dAmplitude = (dLifeTime / dAttackTime) * dStartAmplitude;
+
+			// Decay
+			if (dLifeTime > dAttackTime && dLifeTime <= (dAttackTime + dDeceyTime))
+				dAmplitude = ((dLifeTime - dAttackTime) / dDeceyTime) * (dSustainAmplitude - dStartAmplitude) + dStartAmplitude;
+
+			// Sustain
+			if (dLifeTime > (dAttackTime + dDeceyTime))
+			{
+				dAmplitude = dSustainAmplitude;
+			}
+		}
+		else
+		{
+			// Release
+			dAmplitude = ((dTime - dTriggerOffTime) / dReleaseTime) * (0.0 - dSustainAmplitude) + dSustainAmplitude;
+		}
+
+		if (dAmplitude <= 0.0001)
+		{
+			dAmplitude = 0;
+		}
+
+		return dAmplitude;
+	}
+
+	void NoteOn(double dTimeOn)
+	{
+		dTriggerOnTime = dTimeOn;
+		bNoteOn = true;
+	}
+
+	void NoteOff(double dTimeOff)
+	{
+		dTriggerOffTime = dTimeOff;
+		bNoteOn = false;
+	}
+};
+
 // double dFrequencyOutput = 0.0;
 atomic<double> dFrequencyOutput = 0.0;
 double dOctaveBaseFrequency = 110; // A2 //432-440 A3
 double d12ThRootOF2 = pow(2.0, 1.0 / 12); // puissance
+sEnvelopeADSR envelope;
 
 double MakeNoise(double dTime)
 {
-	
+	double dOutput = envelope.GetAmplitude(dTime) * osc(dFrequencyOutput, dTime, OSC_SAW_ANA);
+	return dOutput * 0.4; // Master volume
+	/*
 	double dOutput = osc(dFrequencyOutput, dTime, 5); // 0 = sine wave
 	return dOutput * 0.4; // Master volume
+	*/
+
+
 
 	// double dOutput = sin(w(dFrequencyOutput) * dTime);
 	// return dOutput * 0.4; // master volum
@@ -100,27 +183,51 @@ int main()
 	// Link noise function with sound machine
 	sound.SetUserFunction(MakeNoise);
 
+	// Display a keyboard
+	wcout << endl <<
+		"|   |   |   |   |   | |   |   |   |   | |   | |   |   |   |" << endl <<
+		"|   | S |   |   | F | | G |   |   | J | | K | | L |   |   |" << endl <<
+		"|   |___|   |   |___| |___|   |   |___| |___| |___|   |   |__" << endl <<
+		"|     |     |     |     |     |     |     |     |     |     |" << endl <<
+		"|  Y  |  X  |  C  |  V  |  B  |  N  |  M  |  ,  |  .  |  -  |" << endl <<
+		"|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|" << endl << endl;
+
 	//double dOctaveBaseFrequency = 440; // C 110.0; // A2
 	// double dOctaveBaseFrequency = 432; // A2
 	// double d12ThRootOF2 = pow(2.0, 1.0 / 12); // puissance
 
+
+	// Sit in loop, capturing keyboard state changes and modify
+	// synthesizer output accordingly
+	int nCurrentKey = -1;
+	bool bKeyPRessed = false;
 	while (1) 
 	{
-
-
-
 		// Add a keyboard like a piano
 		bool bKeyPRessed = false;
 		for (int k = 0; k < 15; k++)
 		{
 			if (GetAsyncKeyState((unsigned char)("YSXCFVGBNJMK\xbcL\xbe"[k])) & 0x8000)
 			{
-				dFrequencyOutput = dOctaveBaseFrequency * pow(d12ThRootOF2, k);
+				if (nCurrentKey != k)
+				{
+					dFrequencyOutput = dOctaveBaseFrequency * pow(d12ThRootOF2, k);
+					envelope.NoteOn(sound.GetTime());
+					nCurrentKey = k;
+				}
 				bKeyPRessed = true;
 			}
 		}
-		if (!bKeyPRessed)
-			dFrequencyOutput = 0.0;
+		if (!bKeyPRessed) 
+		{
+			if (nCurrentKey != -1)
+			{
+				dFrequencyOutput = 0.0;
+				envelope.NoteOff(sound.GetTime());
+				nCurrentKey = -1;
+			}
+		}
+			
 
 		// 12
 		/*
