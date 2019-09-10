@@ -141,7 +141,15 @@ sEnvelopeADSR envelope;
 
 double MakeNoise(double dTime)
 {
-	double dOutput = envelope.GetAmplitude(dTime) * osc(dFrequencyOutput, dTime, OSC_SAW_ANA);
+	//double dOutput = envelope.GetAmplitude(dTime) * osc(dFrequencyOutput, dTime, OSC_SAW_ANA);
+
+	// Mix together a little sine and square waves
+	double dOutput = envelope.GetAmplitude(dTime) *
+		(
+			+ 1.0 * osc(dFrequencyOutput * 0.5, dTime, OSC_SINE)
+			+ 1.0 * osc(dFrequencyOutput, dTime, OSC_SAW_ANA)
+		);
+
 	return dOutput * 0.4; // Master volume
 	/*
 	double dOutput = osc(dFrequencyOutput, dTime, 5); // 0 = sine wave
